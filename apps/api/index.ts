@@ -3,6 +3,8 @@ import cors from "cors";
 import { orchestrate } from "../../services/orchestrator/orchestrator.ts";
 import { getHistory, addMessage } from "../../packages/memory/conversationMemory.ts";
 import { logger } from "../../packages/utils/logger.ts";
+import { ingestDocument } from "../../services/agents/ragAgent.ts";
+import { runNLPPipeline } from "../../packages/nlp/nlpPipeline.ts";
 
 const app = express();
 app.use(cors({ origin: "*" }));
@@ -22,11 +24,11 @@ app.post("/chat", async (req, res) => {
     res.status(500).json({ error: error?.message ?? "Request failed" });
   }
 });
-// Document ingestion endpoint
+
 app.post("/ingest", async (req, res) => {
   try {
     const { text, docId } = req.body;
-    const { ingestDocument } = await import("../../services/agents/ragAgent.ts");
+    logger.info("Ingesting document", { docId });
     const result = await ingestDocument(text, docId);
     res.json(result);
   } catch (error: any) {
@@ -34,6 +36,19 @@ app.post("/ingest", async (req, res) => {
     res.status(500).json({ error: error?.message });
   }
 });
+
+app.post("/nlp", async (req, res) => {
+  try {
+    const { message } = req.body;
+    logger.info("NLP analysis requested", message);
+    const result = await runNLPPipeline(message);
+    res.json(result);
+  } catch (error: any) {
+    logger.error("NLP failed", error?.message);
+    res.status(500).json({ error: error?.message });
+  }
+});
+
 app.listen(3000, "0.0.0.0", () => {
   logger.info("API running at http://127.0.0.1:3000");
 });
