@@ -1,7 +1,7 @@
 import { supervisorRoute } from "./supervisor.ts";
 import { calendarAgent } from "../agents/calendarAgent.ts";
 import { emailAgent } from "../agents/emailAgent.ts";
-import { knowledgeAgent } from "../agents/knowledgeAgent.ts";
+import { ragAgent } from "../agents/ragAgent.ts";
 import { logger } from "../../packages/utils/logger.ts";
 import type { Message } from "../../packages/memory/conversationMemory.ts";
 
@@ -24,9 +24,10 @@ export async function orchestrate(message: string, history: Message[] = []) {
       operation: "send_email",
       to: [],
       subject: message,
-      body: message
+      body: message,
     });
   }
 
-  return await knowledgeAgent(message, history);
+  logger.info("Routing to RAG agent");
+  return await ragAgent(message, history);
 }

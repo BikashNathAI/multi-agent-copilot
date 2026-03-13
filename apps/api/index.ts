@@ -22,7 +22,18 @@ app.post("/chat", async (req, res) => {
     res.status(500).json({ error: error?.message ?? "Request failed" });
   }
 });
-
+// Document ingestion endpoint
+app.post("/ingest", async (req, res) => {
+  try {
+    const { text, docId } = req.body;
+    const { ingestDocument } = await import("../../services/agents/ragAgent.ts");
+    const result = await ingestDocument(text, docId);
+    res.json(result);
+  } catch (error: any) {
+    logger.error("Ingestion failed", error?.message);
+    res.status(500).json({ error: error?.message });
+  }
+});
 app.listen(3000, "0.0.0.0", () => {
   logger.info("API running at http://127.0.0.1:3000");
 });
