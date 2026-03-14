@@ -1,0 +1,13 @@
+services:
+  api:
+    build: .
+    container_name: multi-agent-copilot
+    ports:
+      - "3000:3000"
+    environment:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - OLLAMA_MODEL=llama3.2:1b
+      - LANGCHAIN_TRACING_V2=false
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
